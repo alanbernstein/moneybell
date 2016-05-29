@@ -38,10 +38,12 @@ uint32_t buffer[NUM_PIXELS];
 
 /*
 struct spinner {
-  int length;      // in pixels
+  int position;    // in pixels
+  int tail_length; // in pixels
   uint32_t color;  // base color
   int delay;       // update time
   bool direction;  // 0=CW, 1=CCW
+  unsigned long last_update;  // in ms since boot
 };
 
 spinner spinner1 = {10, R, 10, 0};
@@ -68,26 +70,13 @@ void spinner_init(int len, int offset, uint32_t color) {
 uint32_t color, new_color;
 int t=0;
 unsigned long time;
-
 int num_updates;
 
 void loop() {
-  //ring_test();
-
-  // animate_arbitrary_time_space();
-  /*  
-  */
-  /*
-  update_spinner(t, 10, 1, R);
-  delay(20);
-  */
-  
-  time = millis();
-  num_updates = update_spinners(time);
-  if(num_updates > 0) {
-    draw_spinners_to_buffer();
-    strip.show();
-  }
+  // ring_test();
+  // animate_arbitrary_time_space(t);
+  // animate_simple_spinner(t);
+  animate_multiple_spinners();
   t++;
 }
 
@@ -99,6 +88,15 @@ int dirs[NUM_SPINNERS] = {1, -1, 1};
 uint32_t colors[NUM_SPINNERS] = {R, G, B};
 int delays[NUM_SPINNERS] = {25, 90, 50};
 int last_updates[NUM_SPINNERS] = {0, 0, 0};
+
+void animate_multiple_spinners() {
+  time = millis();
+  num_updates = update_spinners(time);
+  if(num_updates > 0) {
+    draw_spinners_to_buffer();
+    strip.show();
+  }
+}
 
 int update_spinners(unsigned long time) {
   int num_updates = 0;
@@ -155,6 +153,11 @@ void clear_buffer() {
 
 /////////////////////////////////////////
 
+void animate_simple_spinner(int t) {
+  update_spinner(t, 10, 1, R);
+  delay(20);
+}
+
 
 void update_spinner(int t, int len, int speed, uint32_t color) {
   int head_index = (speed*t+len) % NUM_PIXELS;
@@ -164,7 +167,7 @@ void update_spinner(int t, int len, int speed, uint32_t color) {
 }
 
 
-void animate_arbitrary_time_space() {
+void animate_arbitrary_time_space(int t) {
   for(uint16_t i=0; i<60; i++) {
     color = get_ring_color(t, i);
     strip.setPixelColor(i, color);
